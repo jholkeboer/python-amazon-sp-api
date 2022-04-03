@@ -5,7 +5,7 @@ from sp_api.api import FulfillmentInbound
 from sp_api.base import AccessTokenClient
 from sp_api.base import Marketplaces, MissingCredentials, Client, SellingApiForbiddenException
 from sp_api.base.credential_provider import FromCodeCredentialProvider, FromEnvironmentVariablesCredentialProvider, \
-    FromSecretsCredentialProvider, FromConfigFileCredentialProvider, required_credentials
+    FromSecretsCredentialProvider, FromConfigFileCredentialProvider, FromSessionCredentialProvider, required_credentials
 from sp_api.base.exceptions import MissingScopeException
 
 refresh_token = '<refresh_token>'
@@ -72,6 +72,20 @@ def test_from_code_credential_provider_no_role():
 
 def test_from_code_credential_provider_no_role_no_refresh_token():
     p = FromCodeCredentialProvider(credentials=dict(
+        lwa_app_id=lwa_app_id,
+        lwa_client_secret=lwa_client_secret,
+        aws_secret_key=aws_secret_key,
+        aws_access_key=aws_access_key,
+    ))
+    assert p.credentials is not None
+    assert isinstance(p.credentials, dict)
+    assert p.credentials.get('role_arn') is None
+    assert p.credentials.get('refresh_token') is None
+
+
+def test_from_session_credential_provider():
+    p = FromSessionCredentialProvider(credentials=dict(
+        refresh_token=refresh_token,
         lwa_app_id=lwa_app_id,
         lwa_client_secret=lwa_client_secret,
         aws_secret_key=aws_secret_key,

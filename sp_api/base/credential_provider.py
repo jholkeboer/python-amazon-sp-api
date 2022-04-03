@@ -108,6 +108,24 @@ class FromEnvironmentVariablesCredentialProvider(BaseCredentialProvider):
                               os.environ.get(key))
 
 
+class FromSessionCredentialProvider(BaseCredentialProvider):
+    def load_credentials(self):
+        session = boto3.Session()
+        session_credentials = session.get_credentials()
+        account_data = dict(
+            aws_secret_key=session_credentials.secret_key,
+            aws_access_key=session_credentials.access_key,
+            session_token=session_credentials.token,
+        )
+
+        self.credentials.update(account_data)
+
+
+    def __init__(self, credentials: dict, *args, **kwargs):
+        super(FromSessionCredentialProvider, self).__init__('default', credentials)
+        self.credentials = credentials
+
+
 class CredentialProvider:
     credentials = None
     cache = Cache(maxsize=10)
@@ -116,7 +134,8 @@ class CredentialProvider:
         FromCodeCredentialProvider,
         FromEnvironmentVariablesCredentialProvider,
         FromSecretsCredentialProvider,
-        FromConfigFileCredentialProvider
+        FromConfigFileCredentialProvider,
+        FromSessionCredentialProvider,
     ]
 
     def __init__(self, account='default', credentials=None):
@@ -140,3 +159,4 @@ class CredentialProvider:
             self.aws_access_key = kwargs.get('aws_access_key')
             self.aws_secret_key = kwargs.get('aws_secret_key')
             self.role_arn = kwargs.get('role_arn')
+            self.session_token = kwargs.get('session_token')

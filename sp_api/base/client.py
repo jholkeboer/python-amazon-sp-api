@@ -46,7 +46,8 @@ class Client(BaseClient):
         self.boto3_client = session.client(
             'sts',
             aws_access_key_id=self.credentials.aws_access_key,
-            aws_secret_access_key=self.credentials.aws_secret_key
+            aws_secret_access_key=self.credentials.aws_secret_key,
+            aws_session_token=self.credentials.session_token
         )
         self.endpoint = marketplace.endpoint
         self.marketplace_id = marketplace.marketplace_id
